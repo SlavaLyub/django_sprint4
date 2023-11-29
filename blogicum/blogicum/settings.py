@@ -15,6 +15,8 @@ CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+LOGIN_REDIRECT_URL = 'blog:index'
+
 ALLOWED_HOSTS = ['127.0.0.1']
 
 

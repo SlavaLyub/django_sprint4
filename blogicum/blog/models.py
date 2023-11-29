@@ -1,10 +1,9 @@
+from blog.constants import CHAR_LENGHT
+from core.models import Base
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils import timezone
-
-from blog.constants import CHAR_LENGHT
-from core.models import Base
 
 User = get_user_model()
 
@@ -23,7 +22,7 @@ class PostQuerySet(models.QuerySet):
 
 
 class PostManager(models.Manager):
-    """Делает запрос к модели Post и связанным моделям Location, Category"""
+    """Делает запрос к модели Post и связанным моделям Location, Category."""
 
     def get_queryset(self) -> QuerySet:
         return PostQuerySet(self.model).get_posts()
