@@ -9,7 +9,15 @@ User = get_user_model()
 
 
 class PostQuerySet(models.QuerySet):
+    """Менеджер модели Post."""
+
     def get_posts(self):
+        """
+        Запрос к БД фильтр по:
+        is_published=True,
+        pub_date__lte=timezone.now(),
+        category__is_published=True.
+        """
         return self.select_related(
             'location',
             'category',
@@ -29,10 +37,11 @@ class PostManager(models.Manager):
 
 
 class Post(Base):
-    author = models.ForeignKey(
+    author = models.ForeignKey( # manyToOne
         User,
         on_delete=models.CASCADE,
-        verbose_name='Автор публикации')
+        verbose_name='Автор публикации',
+        related_name='posts')
     title = models.CharField(
         max_length=CHAR_LENGHT,
         verbose_name='Заголовок')
@@ -54,12 +63,14 @@ class Post(Base):
         null=True,
         verbose_name='Категория',
         related_name='posts')
+    # comments = models.OneToMany('Comment', related_name='post')
     objects = models.Manager()
     published = PostManager()
 
     class Meta:
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
+        ordering = ('-pub_date',)
 
 
 class Category (Base):
@@ -95,3 +106,25 @@ class Location(Base):
 
     def __str__(self):
         return self.name
+
+
+class Comment(models.Model):
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Автор публикации',
+        related_name='comments'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Добавлено',
+        )
+    text = models.TextField(
+        verbose_name='Текст',
+    )
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        verbose_name='публикация',
+        related_name='comments'
+    )
