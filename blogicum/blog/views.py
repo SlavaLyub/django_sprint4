@@ -10,20 +10,25 @@ from django.urls import reverse_lazy
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView)
 
+class PostViewMixin():
+    model = Post
 
-class PostListView(ListView):
+    def get_queryset(self):  # изменил запрос
+        """Список постов автора."""
+        return super().get_queryset().select_related(
+            'location', 'category', 'author'
+        )
+
+class PostListView(PostViewMixin, ListView):
     """Просмотр главной страницы."""
 
-    model = Post
     ordering = ('-pub_date',)
     paginate_by = 10
     template_name = 'blog/index.html'
 
     def get_queryset(self):  # изменил запрос
         """Список постов автора."""
-        return super().get_queryset().select_related(
-            'location', 'category', 'author'
-        ).annotate(comment_count=Count('comments'))
+        return super().get_queryset().annotate(comment_count=Count('comments'))
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
@@ -41,10 +46,9 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class PostDetailView(DetailView):
+class PostDetailView(PostViewMixin, DetailView):
     """Просмотр отдельного поста."""
 
-    model = Post
     template_name = 'blog/detail.html'
     pk_url_kwarg = 'post_id'
 
@@ -54,12 +58,6 @@ class PostDetailView(DetailView):
         context['form'] = CommentForm()
         context['comments'] = self.object.comments.order_by('created_at')
         return context
-
-    def get_queryset(self):
-        """Получение всех публикаций."""
-        return super().get_queryset().select_related(
-            'location', 'category', 'author'
-        )
 
 
 class PostUpdateView(LoginRequiredMixin, UpdateView):
@@ -148,7 +146,6 @@ class CommentDeleteView(LoginRequiredMixin, DeleteView):
         return reverse_lazy('blog:post_detail', kwargs={'post_id': self.kwargs['post_id']})
 
 
-# Добавил
 class UserUpdateView(LoginRequiredMixin, UpdateView):
     """Страница редактирования профиля."""
 
@@ -168,19 +165,15 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
         return self.request.user
 
 
-class UserDetailView(LoginRequiredMixin, ListView):
+class UserDetailView(PostViewMixin, LoginRequiredMixin, ListView):
     """Просмотр страницы пользователя."""
 
-    model = Post
     template_name = 'blog/profile.html'
-    # slug_url_kwarg = 'username'
     paginate_by = 10
 
     def get_queryset(self):
         """Список постов автора."""
-        return super().get_queryset().select_related(
-            'location', 'category', 'author'
-        ).filter(
+        return super().get_queryset().filter(
             author__username=self.kwargs['username']
         ).annotate(comment_count=Count('comments'))
 
@@ -193,18 +186,16 @@ class UserDetailView(LoginRequiredMixin, ListView):
         return context
 
 
-class CategoryDetailView(LoginRequiredMixin, ListView):
+class CategoryDetailView(PostViewMixin, LoginRequiredMixin, ListView):
     """Просмотр страницы категории."""
 
-    model = Post
     template_name = 'blog/category.html'
     paginate_by = 10
+    raise_exception = True
 
     def get_queryset(self):
         """Список постов автора."""
-        return super().get_queryset().select_related(
-            'location', 'category', 'author'
-        ).filter(
+        return super().get_queryset().filter(
             category__slug=self.kwargs['category_slug']
         ).annotate(comment_count=Count('comments'))
 
