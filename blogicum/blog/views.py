@@ -66,7 +66,7 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
     """Редактирование поста."""
 
     model = Post
-    fields = ('title', 'text', 'pub_date', 'location', 'category')
+    form_class = PostForm
     pk_url_kwarg = 'post_id'
     template_name = 'blog/create.html'
 

@@ -64,7 +64,7 @@ class Post(Base):
         verbose_name='Категория',
         related_name='posts')
     # comments = models.OneToMany('Comment', related_name='post')
-    # image = models.ImageField(null=True, blank=True, upload_to='posts')
+    image = models.ImageField(null=True, blank=True, upload_to='posts')
     objects = models.Manager()
     published = PostManager()
 
