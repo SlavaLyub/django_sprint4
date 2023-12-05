@@ -24,15 +24,15 @@ urlpatterns = [
     # Удаление коментария
     path('posts/<int:post_id>/delete_comment/<int:comment_id>/', views.CommentDeleteView.as_view(), name='delete_comment'),
 
-    
 
+    # редактирование профиля
+    path('profile/edit/', views.UserUpdateView.as_view(), name='edit_profile'),
 
+    # Вывод постов автора
+    path('profile/<slug:username>/', views.UserDetailView.as_view(), name='profile'),
 
-
-
-
-
-    path('profile/<slug:username>/', views.UserDetailView.as_view(), name='profile'),  # TODO доделать путь,
-    path('category/<slug:category_slug>/', views.PostDetailView.as_view(), name='category_posts'),  # TODO Написать нормальную функцию обработчик
+    # Публикации в категории
+    path('category/<slug:category_slug>/', views.CategoryDetailView.as_view(), name='category_posts'),
+    # path('category/health/', views.CategoryListlView.as_view(), name='category_posts'),
 
 ]
