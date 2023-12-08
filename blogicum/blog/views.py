@@ -19,6 +19,7 @@ class PostViewMixin():
             'location', 'category', 'author'
         )
 
+
 class PostListView(PostViewMixin, ListView):
     """Просмотр главной страницы."""
 
@@ -37,7 +38,9 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/create.html'
-    success_url = reverse_lazy('blog:index')
+
+    def get_success_url(self):
+        return reverse_lazy('blog:profile', self.request.user.username)
 
     def form_valid(self, form):
         """Если форма заполнена валидно, сохранить в бд."""
@@ -101,8 +104,9 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
     model = Comment
     form_class = CommentForm
-    # template_name = ''
-    success_url = reverse_lazy('blog:index')
+
+    def get_success_url(self):
+        return reverse_lazy('blog:post_detail', self.kwargs['post_id'])
 
     def form_valid(self, form):
         """Если форма заполнена валидно, сохранить в бд."""

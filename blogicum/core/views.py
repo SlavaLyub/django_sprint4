@@ -11,11 +11,11 @@ def forbidden(request, exception):
 
 
 def csrf_failure(request, reason=''):
-    return render(request, 'core/403csrf.html', status=403)
+    return render(request, 'pages/403csrf.html', status=403)
 
 
-def server_error(exception):
-    return render('core/500.html', status=500)
+def server_error(request):
+    return render(request, 'pages/500.html', status=500)
 
 
 def call_500(request):
