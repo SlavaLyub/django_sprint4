@@ -1,4 +1,8 @@
 from datetime import timezone
+from typing import Any
+
+from django import http
+from django.http.response import HttpResponse
 
 from blog.forms import CommentForm, PostForm, UserForm
 from blog.models import Category, Comment, Post, User
@@ -40,7 +44,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     template_name = 'blog/create.html'
 
     def get_success_url(self):
-        return reverse_lazy('blog:profile', self.request.user.username)
+        return reverse_lazy('blog:profile', kwargs={'username': self.request.user.username})
 
     def form_valid(self, form):
         """Если форма заполнена валидно, сохранить в бд."""
@@ -106,7 +110,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     form_class = CommentForm
 
     def get_success_url(self):
-        return reverse_lazy('blog:post_detail', self.kwargs['post_id'])
+        return reverse_lazy('blog:post_detail', kwargs={'post_id': self.kwargs['post_id']})
 
     def form_valid(self, form):
         """Если форма заполнена валидно, сохранить в бд."""
