@@ -1,39 +1,61 @@
-from datetime import timezone
+from datetime import datetime
 from typing import Any
-
-from django import http
-from django.http.response import HttpResponse
 
 from blog.forms import CommentForm, PostForm, UserForm
 from blog.models import Category, Comment, Post, User
+from django import http
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count
+from django.db.models import Count, Q
+from django.http.response import HttpResponse
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView)
 
+
 class PostViewMixin():
     model = Post
 
-    def get_queryset(self):  # изменил запрос
+    @classmethod
+    def add_filter(cls, user_id, queryset):
         """Список постов автора."""
-        return super().get_queryset().select_related(
-            'location', 'category', 'author'
+        q = Q(
+            is_published=True,
+            category__is_published=True,
+            pub_date__lt=datetime.now()
+        )
+
+        if user_id:
+            q = q | Q(
+                author_id=user_id
+            )
+        return queryset.filter(q).order_by(*cls.model._meta.ordering)
+
+    def get_queryset(self):
+        return PostViewMixin.add_filter(
+            self.request.user.id,
+            super().get_queryset().select_related(
+                'location',
+                'category',
+                'author'
+            )
         )
 
 
-class PostListView(PostViewMixin, ListView):
+class PostListView(ListView):
     """Просмотр главной страницы."""
 
     ordering = ('-pub_date',)
     paginate_by = 10
     template_name = 'blog/index.html'
 
-    def get_queryset(self):  # изменил запрос
+    def get_queryset(self):
         """Список постов автора."""
-        return super().get_queryset().annotate(comment_count=Count('comments'))
+        return PostViewMixin.add_filter(
+            None,
+            Post.objects.annotate(comment_count=Count('comments')),
+        )
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
@@ -96,6 +118,12 @@ class PostDeleteView(LoginRequiredMixin, DeleteView):
     pk_url_kwarg = 'post_id'
     success_url = reverse_lazy('blog:index')
 
+    def dispatch(self, request, *args, **kwargs):
+        if (request.user.id == self.get_object().author_id
+                or request.user.is_superuser):
+            return super().dispatch(request, *args, **kwargs)
+        return self.handle_no_permission()
+
     def get_context_data(self, **kwargs):
         """заполняется форма которую удаляем."""
         context = super().get_context_data(**kwargs)
@@ -148,6 +176,12 @@ class CommentDeleteView(LoginRequiredMixin, DeleteView):
     model = Comment
     pk_url_kwarg = 'comment_id'
     template_name = 'blog/comment.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if (request.user.id == self.get_object().author_id
+                or request.user.is_superuser):
+            return super().dispatch(request, *args, **kwargs)
+        return self.handle_no_permission()
 
     def get_success_url(self) -> str:
         """Переадресация на страницу с публикацией."""
@@ -203,14 +237,19 @@ class CategoryDetailView(PostViewMixin, LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Список постов автора."""
-        return super().get_queryset().filter(
-            category__slug=self.kwargs['category_slug']
-        ).annotate(comment_count=Count('comments'))
+        return PostViewMixin.add_filter(
+            None,
+            super().get_queryset().filter(
+                category__slug=self.kwargs['category_slug']
+            ).annotate(comment_count=Count('comments')),
+        )
 
     def get_context_data(self, **kwargs):
         """Получаем словарь контекста."""
         context = super().get_context_data(**kwargs)
         context['category'] = get_object_or_404(
-            Category, slug=self.kwargs['category_slug']
+            Category,
+            slug=self.kwargs['category_slug'],
+            is_published=True,
         )
         return context

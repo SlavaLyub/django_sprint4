@@ -32,6 +32,6 @@ if settings.DEBUG:
     # )
 
 
-handler403 = 'core.views.forbidden'
-handler404 = 'core.views.page_not_found_view'
-handler500 = 'core.views.server_error'
+handler403 = 'pages.views.forbidden'
+handler404 = 'pages.views.page_not_found_view'
+handler500 = 'pages.views.server_error'
