@@ -30,16 +30,16 @@ class PostViewMixin():
             q = q | Q(
                 author_id=user_id
             )
-        return queryset.filter(q).order_by(*cls.model._meta.ordering)
+        return queryset.filter(q).select_related(
+            'location',
+            'category',
+            'author'
+        ).order_by(*cls.model._meta.ordering)
 
     def get_queryset(self):
         return PostViewMixin.add_filter(
             self.request.user.id,
-            super().get_queryset().select_related(
-                'location',
-                'category',
-                'author'
-            )
+            super().get_queryset()
         )
 
 
@@ -54,7 +54,9 @@ class PostListView(ListView):
         """Список постов автора."""
         return PostViewMixin.add_filter(
             None,
-            Post.objects.annotate(comment_count=Count('comments')),
+            Post.objects.annotate(
+                comment_count=Count('comments')
+            )
         )
 
 
@@ -85,7 +87,10 @@ class PostDetailView(PostViewMixin, DetailView):
         """Передача формы для написания комментария."""
         context = super().get_context_data(**kwargs)
         context['form'] = CommentForm()
-        context['comments'] = self.object.comments.order_by('created_at')
+        context['comments'] = (self.object.comments
+                               .select_related('author')
+                               .order_by('created_at')
+                               )
         return context
 
 
