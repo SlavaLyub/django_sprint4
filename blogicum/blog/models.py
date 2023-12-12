@@ -37,7 +37,7 @@ class PostManager(models.Manager):
 
 
 class Post(Base):
-    author = models.ForeignKey( # manyToOne
+    author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         verbose_name='Автор публикации',
@@ -119,7 +119,7 @@ class Comment(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Добавлено',
-        )
+    )
     text = models.TextField(
         verbose_name='Текст',
     )
