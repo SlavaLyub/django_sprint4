@@ -207,7 +207,7 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
         return self.request.user
 
 
-class UserDetailView(PostViewMixin, LoginRequiredMixin, ListView):
+class UserDetailView(PostViewMixin, ListView):
     """Просмотр страницы пользователя."""
 
     template_name = 'blog/profile.html'
