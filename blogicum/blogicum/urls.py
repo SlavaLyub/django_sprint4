@@ -28,10 +28,10 @@ if settings.DEBUG:
         path('__debug__/', include(debug_toolbar.urls)),
     )
     urlpatterns += static(
-        settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT,
     )
 
 
-handler403 = 'pages.views.forbidden'
 handler404 = 'pages.views.page_not_found_view'
 handler500 = 'pages.views.server_error'
