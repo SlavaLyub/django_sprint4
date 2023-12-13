@@ -22,7 +22,10 @@ LOGIN_REDIRECT_URL = 'blog:index'
 
 LOGIN_URL = 'login'
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'www.slaval.pythonanywhere.com/',
+]
 
 
 # Application definition

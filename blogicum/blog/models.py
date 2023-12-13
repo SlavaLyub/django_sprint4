@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import Count, Q
 from django.db.models.query import QuerySet
 from django.utils import timezone
 
@@ -13,6 +14,29 @@ User = get_user_model()
 class PostQuerySet(models.QuerySet):
     """Менеджер модели Post."""
 
+    @classmethod
+    def add_filter(cls, user_id, queryset):
+        """Список постов автора."""
+        q = Q(
+            is_published=True,
+            category__is_published=True,
+            pub_date__lt=timezone.now()
+        )
+
+        if user_id:
+            q = q | Q(
+                author_id=user_id
+            )
+        return queryset.filter(q).select_related(
+            'location',
+            'category',
+            'author'
+        ).order_by(*Post._meta.ordering)
+
+    @classmethod
+    def add_comments(cls, queryset):
+        return queryset.annotate(comment_count=Count('comments'))
+
     def get_posts(self):
         """
         Запрос к БД фильтр по:
@@ -20,15 +44,7 @@ class PostQuerySet(models.QuerySet):
         pub_date__lte=timezone.now(),
         category__is_published=True.
         """
-        return self.select_related(
-            'location',
-            'category',
-            'author',
-        ).filter(
-            is_published=True,
-            pub_date__lte=timezone.now(),
-            category__is_published=True,
-        )
+        return self.add_filter(None, Post.objects.all())
 
 
 class PostManager(models.Manager):
