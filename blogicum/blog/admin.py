@@ -1,8 +1,7 @@
 from django.contrib import admin
 
+from .constants import SHORT_STANDARD, SHORT_STANDARD_MIN
 from .models import Category, Location, Post
-
-SHORT_STANDARD = 50
 
 
 @admin.register(Location)
@@ -73,7 +72,7 @@ class PostAdmin(admin.ModelAdmin):
 
     @admin.display(description='Местоположение')
     def short_location(self, obj):
-        return obj.location.name[:25]
+        return obj.location.name[:SHORT_STANDARD_MIN]
 
     @admin.display(description='Категория')
     def short_category(self, obj):

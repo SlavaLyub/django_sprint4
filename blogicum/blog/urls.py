@@ -43,7 +43,7 @@ urlpatterns = [
     path('profile/edit/', views.UserUpdateView.as_view(), name='edit_profile'),
 
     # Вывод постов автора
-    path('profile/<slug:username>/',
+    path('profile/<str:username>/',
          views.UserDetailView.as_view(),
          name='profile'),
 

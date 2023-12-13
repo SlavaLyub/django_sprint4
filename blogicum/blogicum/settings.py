@@ -13,7 +13,7 @@ print(EMAIL_FILE_PATH)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-)x87%7($tdp!kg97*2&9w-0h(l(l=68ho(n#2_pqc(og71(9dq'
 
-CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
+CSRF_FAILURE_VIEW = 'pages.views.csrf_failure'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

@@ -1,9 +1,11 @@
-from blog.constants import CHAR_LENGHT
-from core.models import Base
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils import timezone
+
+from blog.constants import CHAR_LENGHT
+from core.models import Base
+
 
 User = get_user_model()
 
@@ -63,7 +65,6 @@ class Post(Base):
         null=True,
         verbose_name='Категория',
         related_name='posts')
-    # comments = models.OneToMany('Comment', related_name='post')
     image = models.ImageField(null=True, blank=True, upload_to='posts')
     objects = models.Manager()
     published = PostManager()

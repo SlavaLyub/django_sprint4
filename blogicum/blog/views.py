@@ -1,7 +1,5 @@
 from datetime import datetime
 
-from blog.forms import CommentForm, PostForm, UserForm
-from blog.models import Category, Comment, Post, User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Q
@@ -9,6 +7,10 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView)
+
+from blog.forms import CommentForm, PostForm, UserForm
+from blog.models import Category, Comment, Post, User
+from .constants import PAGINATE_BY
 
 
 class PostViewMixin():
@@ -44,7 +46,7 @@ class PostListView(ListView):
     """Просмотр главной страницы."""
 
     ordering = ('-pub_date',)
-    paginate_by = 10
+    paginate_by = PAGINATE_BY
     template_name = 'blog/index.html'
 
     def get_queryset(self):
@@ -86,10 +88,11 @@ class PostDetailView(PostViewMixin, DetailView):
         """Передача формы для написания комментария."""
         context = super().get_context_data(**kwargs)
         context['form'] = CommentForm()
-        context['comments'] = (self.object.comments
-                               .select_related('author')
-                               .order_by('created_at')
-                               )
+        context['comments'] = (
+            self.object.comments
+            .select_related('author')
+            .order_by('created_at')
+        )
         return context
 
 
@@ -125,7 +128,7 @@ class PostDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('blog:index')
 
     def dispatch(self, request, *args, **kwargs):
-        if (request.user.id == self.get_object().author_id
+        if (request.user == self.get_object().author
                 or request.user.is_superuser):
             return super().dispatch(request, *args, **kwargs)
         return self.handle_no_permission()
@@ -217,7 +220,7 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_object(self):
-        """."""
+        """Определил объект для класса."""
         return self.request.user
 
 
