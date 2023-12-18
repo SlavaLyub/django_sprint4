@@ -44,7 +44,7 @@ class PostQuerySet(models.QuerySet):
         pub_date__lte=timezone.now(),
         category__is_published=True.
         """
-        return self.add_filter(None, Post.objects.all())
+        return self.add_filter(None, Post.objects)
 
 
 class PostManager(models.Manager):
@@ -86,7 +86,7 @@ class Post(Base):
     published = PostManager()
 
     class Meta:
-        verbose_name = 'публикация'
+        verbose_name = 'Публикация'
         verbose_name_plural = 'Публикации'
         ordering = ('-pub_date',)
 
@@ -130,7 +130,7 @@ class Comment(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Автор публикации',
+        verbose_name='Автор комментария',
         related_name='comments'
     )
     created_at = models.DateTimeField(
@@ -146,3 +146,10 @@ class Comment(models.Model):
         verbose_name='публикация',
         related_name='comments'
     )
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return self.text

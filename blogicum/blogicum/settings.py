@@ -6,7 +6,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
 EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
-print(EMAIL_FILE_PATH)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -24,7 +23,8 @@ LOGIN_URL = 'login'
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
-    'www.slaval.pythonanywhere.com/',
+    'www.SlavaL.pythonanywhere.com',
+    'SlavaL.pythonanywhere.com',
 ]
 
 
@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'pages.apps.PagesConfig',
     'blog.apps.BlogConfig',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -62,6 +63,8 @@ INTERNAL_IPS = [
 
 ROOT_URLCONF = 'blogicum.urls'
 
+# TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
+# Пример альтернативной записи
 TEMPLATES_DIR = BASE_DIR / 'templates'
 
 TEMPLATES = [

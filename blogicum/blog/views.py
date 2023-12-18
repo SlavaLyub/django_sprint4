@@ -12,20 +12,9 @@ from .constants import PAGINATE_BY
 class AuthorRequiredMixin():
 
     def dispatch(self, request, *args, **kwargs):
-        if (request.user == self.get_object().author
-                or request.user.is_superuser):
+        if (request.user == self.get_object().author):
             return super().dispatch(request, *args, **kwargs)
         return self.handle_no_permission()
-
-
-class PostViewMixin():
-    model = Post
-
-    def get_queryset(self):
-        return PostQuerySet.add_filter(
-            self.request.user.id,
-            super().get_queryset()
-        )
 
 
 class RelatedPostsViewMixin():
@@ -50,7 +39,7 @@ class PostListView(ListView):
         """Список постов автора."""
         return PostQuerySet.add_filter(
             None,
-            PostQuerySet.add_comments(Post.objects.all())
+            PostQuerySet.add_comments(Post.objects)
         )
 
 
@@ -73,11 +62,19 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class PostDetailView(PostViewMixin, DetailView):
+class PostDetailView(DetailView):
     """Просмотр отдельного поста."""
+
+    model = Post
 
     template_name = 'blog/detail.html'
     pk_url_kwarg = 'post_id'
+
+    def get_queryset(self):
+        return PostQuerySet.add_filter(
+            self.request.user.id,
+            super().get_queryset()
+        )
 
     def get_context_data(self, **kwargs):
         """Передача формы для написания комментария."""
@@ -193,7 +190,7 @@ class UserDetailView(RelatedPostsViewMixin, ListView):
     """Просмотр страницы пользователя."""
 
     template_name = 'blog/profile.html'
-    paginate_by = 10
+    paginate_by = PAGINATE_BY
 
     def get_object(self):
         return get_object_or_404(
@@ -214,8 +211,7 @@ class CategoryDetailView(RelatedPostsViewMixin, LoginRequiredMixin, ListView):
     """Просмотр страницы категории."""
 
     template_name = 'blog/category.html'
-    paginate_by = 10
-    raise_exception = True
+    paginate_by = PAGINATE_BY
 
     def get_user_id(self):
         return None
